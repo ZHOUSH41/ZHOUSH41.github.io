@@ -7,7 +7,7 @@
 {  
   "@context":"http://schema.org",
   "@type":"Website",
-  "@id":"https:\/\/example.org\/",
+  "@id":"https:\/\/zhoush41.github.io\/",
   "author": {
     "@type": "Person",
     "name": "ZHOUSH41",
@@ -17,7 +17,7 @@
   },
   "name":"Hugo tranquilpeak theme",
   "description":"\u003ch2 id=\u0022问题\u0022\u003e问题：\u003c\/h2\u003e\n\u003cp\u003e从一个多线程处理并发问题谈起，首先有一个任务处理函数 DoTask(int) int，此函数根据输入计算一个结果并返回（任意的实现）。编写程序，用户可以输入n个需要处理的数据和最大的并行计算数 m。这n个输入数据通过DoTask函数并行的完成计算，每完成一次计算，就输出进度、已完成的计算结果的累加值。\u003c\/p\u003e\n\u003cdiv class=\u0022highlight\u0022\u003e\u003cpre tabindex=\u00220\u0022 style=\u0022color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\u0022\u003e\u003ccode class=\u0022language-go\u0022 data-lang=\u0022go\u0022\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ 任意的返回一个结果就行，这块随意实现\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003eDoTask\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e) \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ereturn\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e*\u003c\/span\u003e\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e}\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/code\u003e\u003c\/pre\u003e\u003c\/div\u003e\u003ch2 id=\u0022问题分析\u0022\u003e问题分析：\u003c\/h2\u003e\n\u003col\u003e\n\u003cli\u003e并发模式：首先这是一个多生产者单消费者的并发模式，那么可以生产者可以通过channel来发送数据\u003c\/li\u003e\n\u003cli\u003e并发控制：问题中可以用条件变量或者channel来实现，最大并发数的控制\u003c\/li\u003e\n\u003cli\u003e并发协调：因为需要等待所有生产者生产完数据之后才能退出，所以这里需要waitgroup来控制并发完之后的协程等待\u003c\/li\u003e\n\u003c\/ol\u003e\n\u003cul\u003e\n\u003cli\u003e初版\u003c\/li\u003e\n\u003c\/ul\u003e\n\u003cdiv class=\u0022highlight\u0022\u003e\u003cpre tabindex=\u00220\u0022 style=\u0022color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\u0022\u003e\u003ccode class=\u0022language-go\u0022 data-lang=\u0022go\u0022\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003emain\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003em\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e10\u003c\/span\u003e, \u003cspan style=\u0022color:#ae81ff\u0022\u003e5\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003evar\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003esync\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWaitGroup\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003emaxCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003em\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;=\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003em\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003emaxCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;=\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eAdd\u003c\/span\u003e(\u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e) {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;start go\u0026#34;\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e\u003cspan style=\u0022color:#a6e22e\u0022\u003emaxCh\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003eDoTask\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003emaxCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}(\u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eDone\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003esum\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ fEnd:\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003eselect\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ecase\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ex\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e:\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u002b=\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ex\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003esum\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003esum\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003eif\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003esum\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e==\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ break fEnd\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\t\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ereturn\u003c\/span\u003e \n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003edefault\u003c\/span\u003e:\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSleep\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSecond\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWait\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e}\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/code\u003e\u003c\/pre\u003e\u003c\/div\u003e\u003cp\u003etips: for select中如果需要使用break，需要指定外层的for命名，不然只会跳过seclect\n初版实现的问题：\u003c\/p\u003e\n\u003col\u003e\n\u003cli\u003e虽然打印出来了对应的数据，但是没有控制并发的数量，因为实际上是进入了go func后在go func里做执行的时候阻塞住了，并没有控制到对应数量的\u003c\/li\u003e\n\u003cli\u003e没有实现优雅退出，因为是通过消费端特定数量的实现来确定的退出机制的，这样实现不太优雅\u003c\/li\u003e\n\u003cli\u003ewaitgroup实际上没有任何的用处，因为消费端是在主进程之中，并且是循环等待的，所以怎么都会等待所有生产者线程执行完\u003c\/li\u003e\n\u003c\/ol\u003e\n\u003cp\u003e第二版实现：\u003c\/p\u003e\n\u003cdiv class=\u0022highlight\u0022\u003e\u003cpre tabindex=\u00220\u0022 style=\u0022color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\u0022\u003e\u003ccode class=\u0022language-go\u0022 data-lang=\u0022go\u0022\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003emain\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003estruct\u003c\/span\u003e{}, \u003cspan style=\u0022color:#ae81ff\u0022\u003e3\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e, \u003cspan style=\u0022color:#ae81ff\u0022\u003e3\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003evar\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003esync\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWaitGroup\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003erange\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u002b=\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;receiver\u0026#34;\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;all done\u0026#34;\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ sender controller\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e10\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003estruct\u003c\/span\u003e{}{}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eAdd\u003c\/span\u003e(\u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ worker\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e) {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;start go\u0026#34;\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003edefer\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eDone\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ do something\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003eDoTask\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSleep\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSecond\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}(\u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWait\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e}\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/code\u003e\u003c\/pre\u003e\u003c\/div\u003e\u003cp\u003e改动\u003c\/p\u003e\n\u003col\u003e\n\u003cli\u003e把并发控制的channel前置到for循环当中，实际上就只有3个协程在工作了\u003c\/li\u003e\n\u003cli\u003ewaitgroup可以做有效的等待了（但这里还是有问题）\n问题\u003c\/li\u003e\n\u003cli\u003e消费者线程打印的all done其实不会打印，因为主进程已经退出了\u003c\/li\u003e\n\u003cli\u003e其实也没有实现优雅退出，因为并没有去关闭对应的channel\u003c\/li\u003e\n\u003c\/ol\u003e\n\u003cp\u003e最终版：\u003c\/p\u003e\n\u003cdiv class=\u0022highlight\u0022\u003e\u003cpre tabindex=\u00220\u0022 style=\u0022color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\u0022\u003e\u003ccode class=\u0022language-go\u0022 data-lang=\u0022go\u0022\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003emain\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003estruct\u003c\/span\u003e{}, \u003cspan style=\u0022color:#ae81ff\u0022\u003e3\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e, \u003cspan style=\u0022color:#ae81ff\u0022\u003e3\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003evar\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003esync\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWaitGroup\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003evar\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg1\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003esync\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWaitGroup\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eAdd\u003c\/span\u003e(\u003cspan style=\u0022color:#ae81ff\u0022\u003e2\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ sender controller\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003edefer\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eDone\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e100000\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003estruct\u003c\/span\u003e{}{}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg1\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eAdd\u003c\/span\u003e(\u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ worker\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e) {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003edefer\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg1\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eDone\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ do something\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003eDoTask\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSleep\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSecond\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\t\u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t}(\u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg1\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWait\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\tclose(\u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ recevied controller\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003edefer\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eDone\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003erange\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u002b=\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;receiver\u0026#34;\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;all done\u0026#34;\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWait\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e}\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/code\u003e\u003c\/pre\u003e\u003c\/div\u003e\u003col\u003e\n\u003cli\u003e主进程需要等待生产者和消费都结束之后才能退出，这个wg保证的\u003c\/li\u003e\n\u003cli\u003e生产者在所有生产队列生产完毕之后close 发送的channel，实现了优雅的关闭逻辑\u003c\/li\u003e\n\u003c\/ol\u003e\n\u003cp\u003e当然也可以使用，消费者去close一个channel，然后将这个消息proxy给生产者然后退出，\n上面最终版的实现把多生产者再统一成一个管理者的模式，可以实现优雅的关闭，还可以拓展成多生产多消费的情况，而且代码易读性（易读性是个人的看法）比较好\u003c\/p\u003e",
-  "url":"https:\/\/example.org\/post\/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9\/",
+  "url":"https:\/\/zhoush41.github.io\/post\/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9\/",
   "keywords":"[tech]"
 }
 
@@ -321,8 +321,8 @@ func main() {
 <meta property="og:type" content="article">
 <meta property="og:title" content="Golang多线程的踩坑点">
 <meta name="twitter:title" content="Golang多线程的踩坑点">
-<meta property="og:url" content="https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
-<meta property="twitter:url" content="https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
+<meta property="og:url" content="https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
+<meta property="twitter:url" content="https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
 <meta property="og:site_name" content="Hugo tranquilpeak theme">
 <meta property="og:description" content="问题：
 从一个多线程处理并发问题谈起，首先有一个任务处理函数 DoTask(int) int，此函数根据输入计算一个结果并返回（任意的实现）。编写程序，用户可以输入n个需要处理的数据和最大的并行计算数 m。这n个输入数据通过DoTask函数并行的完成计算，每完成一次计算，就输出进度、已完成的计算结果的累加值。
@@ -655,12 +655,12 @@ func main() {
 
     <title>Golang多线程的踩坑点</title>
 
-    <link rel="icon" href="https://example.org/favicon.png">
+    <link rel="icon" href="https://zhoush41.github.io/favicon.png">
     
 
     
 
-    <link rel="canonical" href="https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
+    <link rel="canonical" href="https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
 
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -668,7 +668,7 @@ func main() {
     
     
     
-    <link rel="stylesheet" href="https://example.org/css/style-h6ccsoet3mzkbb0wngshlfbaweimexgqcxj0h5hu4h82olsdzz6wmqdkajm.min.css" />
+    <link rel="stylesheet" href="https://zhoush41.github.io/css/style-h6ccsoet3mzkbb0wngshlfbaweimexgqcxj0h5hu4h82olsdzz6wmqdkajm.min.css" />
     
     
 
@@ -683,12 +683,12 @@ func main() {
       <header id="header" data-behavior="4">
   <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
   <div class="header-title">
-    <a class="header-title-link" href="https://example.org/" aria-label="Go to homepage">Hugo tranquilpeak theme</a>
+    <a class="header-title-link" href="https://zhoush41.github.io/" aria-label="Go to homepage">Hugo tranquilpeak theme</a>
   </div>
   
     
       <a class="header-right-picture "
-         href="https://example.org/#about" aria-label="Open the link: /#about">
+         href="https://zhoush41.github.io/#about" aria-label="Open the link: /#about">
     
     
     
@@ -704,7 +704,7 @@ func main() {
   <div class="sidebar-container">
     
       <div class="sidebar-profile">
-        <a href="https://example.org/#about" aria-label="Read more about the author">
+        <a href="https://zhoush41.github.io/#about" aria-label="Read more about the author">
           <img class="sidebar-profile-picture" src="https://www.gravatar.com/avatar/ef0b72b98f479f5123a54b6c06c9ef12?s=110" alt="Author&#39;s picture" />
         </a>
         <h4 class="sidebar-profile-name">ZHOUSH41</h4>
@@ -717,7 +717,7 @@ func main() {
       
   <li class="sidebar-button">
     
-      <a class="sidebar-button-link " href="https://example.org/" title="Home">
+      <a class="sidebar-button-link " href="https://zhoush41.github.io/" title="Home">
     
       <i class="sidebar-button-icon fas fa-lg fa-home" aria-hidden="true"></i>
       
@@ -727,7 +727,7 @@ func main() {
 
   <li class="sidebar-button">
     
-      <a class="sidebar-button-link " href="https://example.org/categories" title="Categories">
+      <a class="sidebar-button-link " href="https://zhoush41.github.io/categories" title="Categories">
     
       <i class="sidebar-button-icon fas fa-lg fa-bookmark" aria-hidden="true"></i>
       
@@ -737,7 +737,7 @@ func main() {
 
   <li class="sidebar-button">
     
-      <a class="sidebar-button-link " href="https://example.org/tags" title="Tags">
+      <a class="sidebar-button-link " href="https://zhoush41.github.io/tags" title="Tags">
     
       <i class="sidebar-button-icon fas fa-lg fa-tags" aria-hidden="true"></i>
       
@@ -747,7 +747,7 @@ func main() {
 
   <li class="sidebar-button">
     
-      <a class="sidebar-button-link " href="https://example.org/archives" title="Archives">
+      <a class="sidebar-button-link " href="https://zhoush41.github.io/archives" title="Archives">
     
       <i class="sidebar-button-icon fas fa-lg fa-archive" aria-hidden="true"></i>
       
@@ -757,7 +757,7 @@ func main() {
 
   <li class="sidebar-button">
     
-      <a class="sidebar-button-link " href="https://example.org/#about" title="About">
+      <a class="sidebar-button-link " href="https://zhoush41.github.io/#about" title="About">
     
       <i class="sidebar-button-icon fas fa-lg fa-question" aria-hidden="true"></i>
       
@@ -785,7 +785,7 @@ func main() {
       
   <li class="sidebar-button">
     
-      <a class="sidebar-button-link " href="https://example.org/index.xml" title="RSS">
+      <a class="sidebar-button-link " href="https://zhoush41.github.io/index.xml" title="RSS">
     
       <i class="sidebar-button-icon fas fa-lg fa-rss" aria-hidden="true"></i>
       
@@ -827,9 +827,9 @@ func main() {
   
     <span>in</span>
     
-      <a class="category-link" href="https://example.org/categories/category">category</a>, 
+      <a class="category-link" href="https://zhoush41.github.io/categories/category">category</a>, 
     
-      <a class="category-link" href="https://example.org/categories/subcategory">subcategory</a>
+      <a class="category-link" href="https://zhoush41.github.io/categories/subcategory">subcategory</a>
     
   
 
@@ -996,9 +996,9 @@ func main() {
                   <div class="post-footer-tags">
                     <span class="text-color-light text-small">TAGGED IN</span><br/>
                     
-  <a class="tag tag--primary tag--small" href="https://example.org/tags/golang/">Golang</a>
+  <a class="tag tag--primary tag--small" href="https://zhoush41.github.io/tags/golang/">Golang</a>
 
-  <a class="tag tag--primary tag--small" href="https://example.org/tags/%E5%B9%B6%E5%8F%91/">并发</a>
+  <a class="tag tag--primary tag--small" href="https://zhoush41.github.io/tags/%E5%B9%B6%E5%8F%91/">并发</a>
 
                   </div>
                 
@@ -1019,7 +1019,7 @@ func main() {
         </li>
         <li class="post-action">
           
-            <a class="post-action-btn btn btn--default tooltip--top" href="https://example.org/post/first-post/" data-tooltip="First Post" aria-label="PREVIOUS: First Post">
+            <a class="post-action-btn btn btn--default tooltip--top" href="https://zhoush41.github.io/post/first-post/" data-tooltip="First Post" aria-label="PREVIOUS: First Post">
           
               <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
               <i class="fa fa-angle-right"></i>
@@ -1037,19 +1037,19 @@ func main() {
     </li>
     
       <li class="post-action hide-xs">
-        <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Facebook" aria-label="Share on Facebook">
+        <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Facebook" aria-label="Share on Facebook">
           <i class="fab fa-facebook-square" aria-hidden="true"></i>
         </a>
       </li>
     
       <li class="post-action hide-xs">
-        <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Twitter" aria-label="Share on Twitter">
+        <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Twitter" aria-label="Share on Twitter">
           <i class="fab fa-twitter" aria-hidden="true"></i>
         </a>
       </li>
     
       <li class="post-action hide-xs">
-        <a class="post-action-btn btn btn--default" target="new" href="https://www.linkedin.com/sharing/share-offsite/?url=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Linkedin" aria-label="Share on Linkedin">
+        <a class="post-action-btn btn btn--default" target="new" href="https://www.linkedin.com/sharing/share-offsite/?url=https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Linkedin" aria-label="Share on Linkedin">
           <i class="fab fa-linkedin" aria-hidden="true"></i>
         </a>
       </li>
@@ -1080,7 +1080,7 @@ func main() {
     </div>
     <script type="text/javascript">
       var disqus_config = function() {
-        this.page.url = 'https:\/\/example.org\/post\/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9\/';
+        this.page.url = 'https:\/\/zhoush41.github.io\/post\/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9\/';
         
           this.page.identifier = '\/post\/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9\/'
         
@@ -1126,7 +1126,7 @@ func main() {
         </li>
         <li class="post-action">
           
-            <a class="post-action-btn btn btn--default tooltip--top" href="https://example.org/post/first-post/" data-tooltip="First Post" aria-label="PREVIOUS: First Post">
+            <a class="post-action-btn btn btn--default tooltip--top" href="https://zhoush41.github.io/post/first-post/" data-tooltip="First Post" aria-label="PREVIOUS: First Post">
           
               <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
               <i class="fa fa-angle-right"></i>
@@ -1144,19 +1144,19 @@ func main() {
     </li>
     
       <li class="post-action hide-xs">
-        <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Facebook" aria-label="Share on Facebook">
+        <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Facebook" aria-label="Share on Facebook">
           <i class="fab fa-facebook-square" aria-hidden="true"></i>
         </a>
       </li>
     
       <li class="post-action hide-xs">
-        <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Twitter" aria-label="Share on Twitter">
+        <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Twitter" aria-label="Share on Twitter">
           <i class="fab fa-twitter" aria-hidden="true"></i>
         </a>
       </li>
     
       <li class="post-action hide-xs">
-        <a class="post-action-btn btn btn--default" target="new" href="https://www.linkedin.com/sharing/share-offsite/?url=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Linkedin" aria-label="Share on Linkedin">
+        <a class="post-action-btn btn btn--default" target="new" href="https://www.linkedin.com/sharing/share-offsite/?url=https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Linkedin" aria-label="Share on Linkedin">
           <i class="fab fa-linkedin" aria-hidden="true"></i>
         </a>
       </li>
@@ -1187,19 +1187,19 @@ func main() {
   <ul class="share-options">
     
       <li class="share-option">
-        <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fexample.org%2Fpost%2Fgolang%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E7%259A%2584%25E8%25B8%25A9%25E5%259D%2591%25E7%2582%25B9%2F" aria-label="Share on Facebook">
+        <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fzhoush41.github.io%2Fpost%2Fgolang%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E7%259A%2584%25E8%25B8%25A9%25E5%259D%2591%25E7%2582%25B9%2F" aria-label="Share on Facebook">
           <i class="fab fa-facebook-square" aria-hidden="true"></i><span>Share on Facebook</span>
         </a>
       </li>
     
       <li class="share-option">
-        <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=https%3A%2F%2Fexample.org%2Fpost%2Fgolang%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E7%259A%2584%25E8%25B8%25A9%25E5%259D%2591%25E7%2582%25B9%2F" aria-label="Share on Twitter">
+        <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=https%3A%2F%2Fzhoush41.github.io%2Fpost%2Fgolang%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E7%259A%2584%25E8%25B8%25A9%25E5%259D%2591%25E7%2582%25B9%2F" aria-label="Share on Twitter">
           <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
         </a>
       </li>
     
       <li class="share-option">
-        <a class="share-option-btn" target="new" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fexample.org%2Fpost%2Fgolang%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E7%259A%2584%25E8%25B8%25A9%25E5%259D%2591%25E7%2582%25B9%2F" aria-label="Share on Linkedin">
+        <a class="share-option-btn" target="new" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fzhoush41.github.io%2Fpost%2Fgolang%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E7%259A%2584%25E8%25B8%25A9%25E5%259D%2591%25E7%2582%25B9%2F" aria-label="Share on Linkedin">
           <i class="fab fa-linkedin" aria-hidden="true"></i><span>Share on Linkedin</span>
         </a>
       </li>
@@ -1245,7 +1245,7 @@ func main() {
     
   
     
-      <div id="cover" style="background-image:url('https://example.org/images/cover.jpg');"></div>
+      <div id="cover" style="background-image:url('https://zhoush41.github.io/images/cover.jpg');"></div>
     
   
 
@@ -1258,7 +1258,7 @@ func main() {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha512-uURl+ZXMBrF4AwGaWmEetzrd+J5/8NRkWAvJx5sbPSSuOb0bZLqf+tOzniObO00BjHa/dD7gub9oCGMLPQHtQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 
-<script src="https://example.org/js/script-yqzy9wdlzix4lbbwdnzvwx3egsne77earqmn73v9uno8aupuph8wfguccut.min.js"></script>
+<script src="https://zhoush41.github.io/js/script-yqzy9wdlzix4lbbwdnzvwx3egsne77earqmn73v9uno8aupuph8wfguccut.min.js"></script>
 
 
   

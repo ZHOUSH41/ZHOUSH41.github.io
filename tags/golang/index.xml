@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Golang on Hugo tranquilpeak theme</title>
-    <link>https://example.org/tags/golang/</link>
+    <link>https://zhoush41.github.io/tags/golang/</link>
     <description>Recent content in Golang on Hugo tranquilpeak theme</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 21 Mar 2023 07:14:20 +0800</lastBuildDate><atom:link href="https://example.org/tags/golang/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 21 Mar 2023 07:14:20 +0800</lastBuildDate><atom:link href="https://zhoush41.github.io/tags/golang/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Golang多线程的踩坑点</title>
-      <link>https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/</link>
+      <link>https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/</link>
       <pubDate>Tue, 21 Mar 2023 07:14:20 +0800</pubDate>
       
-      <guid>https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/</guid>
+      <guid>https://zhoush41.github.io/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/</guid>
       <description>&lt;h2 id=&#34;问题&#34;&gt;问题：&lt;/h2&gt;
 &lt;p&gt;从一个多线程处理并发问题谈起，首先有一个任务处理函数 DoTask(int) int，此函数根据输入计算一个结果并返回（任意的实现）。编写程序，用户可以输入n个需要处理的数据和最大的并行计算数 m。这n个输入数据通过DoTask函数并行的完成计算，每完成一次计算，就输出进度、已完成的计算结果的累加值。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// 任意的返回一个结果就行，这块随意实现

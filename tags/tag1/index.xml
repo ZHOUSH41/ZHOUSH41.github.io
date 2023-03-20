@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>tag1 on Hugo tranquilpeak theme</title>
-    <link>https://example.org/tags/tag1/</link>
+    <link>https://zhoush41.github.io/tags/tag1/</link>
     <description>Recent content in tag1 on Hugo tranquilpeak theme</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 21 Mar 2023 07:13:16 +0800</lastBuildDate><atom:link href="https://example.org/tags/tag1/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 21 Mar 2023 07:13:16 +0800</lastBuildDate><atom:link href="https://zhoush41.github.io/tags/tag1/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>First Post</title>
-      <link>https://example.org/post/first-post/</link>
+      <link>https://zhoush41.github.io/post/first-post/</link>
       <pubDate>Tue, 21 Mar 2023 07:13:16 +0800</pubDate>
       
-      <guid>https://example.org/post/first-post/</guid>
+      <guid>https://zhoush41.github.io/post/first-post/</guid>
       <description></description>
     </item>
     
