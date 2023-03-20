@@ -17,7 +17,7 @@
   },
   "name":"Hugo tranquilpeak theme",
   "description":"Hugo tranquilpeak theme demo",
-  "url":"https:\/\/example.org\/tags\/",
+  "url":"https:\/\/example.org\/tags\/tag1\/",
   "keywords":"[]"
 }
 
@@ -33,10 +33,10 @@
 
 <meta property="og:description" content="Hugo tranquilpeak theme demo">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Tags">
-<meta name="twitter:title" content="Tags">
-<meta property="og:url" content="https://example.org/tags/">
-<meta property="twitter:url" content="https://example.org/tags/">
+<meta property="og:title" content="tag1">
+<meta name="twitter:title" content="tag1">
+<meta property="og:url" content="https://example.org/tags/tag1/">
+<meta property="twitter:url" content="https://example.org/tags/tag1/">
 <meta property="og:site_name" content="Hugo tranquilpeak theme">
 <meta property="og:description" content="Hugo tranquilpeak theme demo">
 <meta name="twitter:description" content="Hugo tranquilpeak theme demo">
@@ -59,16 +59,16 @@
 
 
 
-    <title>Tags</title>
+    <title>tag1</title>
 
     <link rel="icon" href="https://example.org/favicon.png">
     
-      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://example.org/tags/index.xml">
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="https://example.org/tags/tag1/index.xml">
     
 
     
 
-    <link rel="canonical" href="https://example.org/tags/">
+    <link rel="canonical" href="https://example.org/tags/tag1/">
 
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -207,124 +207,83 @@
 </nav>
 
       
+        
 
+      
       <div id="main" data-behavior="1"
         class="
                hasCoverMetaIn
                ">
+        
+          <section class="postShorten-group main-content-wrap">
+            
+            
+              
+  
+    
+      
+        
+      
+    
+  
 
-        <div id="tags-archives" class="main-content-wrap">
-          <form id="filter-form" action="#">
-            <input name="tag" type="text" class="form-control input--xlarge" placeholder="Search tag" autofocus="autofocus">
-          </form>
-          <h4 class="archive-result text-color-base text-xlarge"
-              data-message-zero="no tag found"
-              data-message-one="1 tag found"
-              data-message-other="{n} tags found"></h4>
 
-            <section>
-              
-                <a class="tag tag--primary tag--small" href="#golang-list" data-tag="golang">
-                  golang
-                </a>
-              
-                <a class="tag tag--primary tag--small" href="#tag1-list" data-tag="tag1">
-                  tag1
-                </a>
-              
-                <a class="tag tag--primary tag--small" href="#tag2-list" data-tag="tag2">
-                  tag2
-                </a>
-              
-                <a class="tag tag--primary tag--small" href="#%25E5%25B9%25B6%25E5%258F%2591-list" data-tag="并发">
-                  并发
-                </a>
-              
-            </section>
-            <section class="boxes">
-              
-                <div id="golang-list" class="archive box" data-tag="golang">
-                  <h4 class="archive-title">
-                    <a class="link-unstyled" href="golang">
-                      golang (1)
-                    </a>
-                  </h4>
-                  <ul class="archive-posts">
-                    
-                      <li class="archive-post">
-                        <a class="archive-post-title" href="https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
-                          Golang多线程的踩坑点
-                        </a>
-                        <span class="archive-post-date"> - 
+  
+
+<article class="postShorten postShorten--thumbnailimg-bottom">
+  <div class="postShorten-wrap">
+    
+    <div class="postShorten-header">
+      <h1 class="postShorten-title">
+      
+        <a class="link-unstyled" href="https://example.org/post/first-post/" aria-label="Open the post: First Post">
+      
+          First Post
+        </a>
+      </h1>
+      
+  <div class="postShorten-meta post-meta">
+    
+      <time datetime="2023-03-21T07:13:16&#43;08:00">
+        
   March 21, 2023
-</span>
-                      </li>
-                    
-                  </ul>
-                </div>
-              
-                <div id="tag1-list" class="archive box" data-tag="tag1">
-                  <h4 class="archive-title">
-                    <a class="link-unstyled" href="tag1">
-                      tag1 (1)
-                    </a>
-                  </h4>
-                  <ul class="archive-posts">
-                    
-                      <li class="archive-post">
-                        <a class="archive-post-title" href="https://example.org/post/first-post/">
-                          First Post
-                        </a>
-                        <span class="archive-post-date"> - 
-  March 21, 2023
-</span>
-                      </li>
-                    
-                  </ul>
-                </div>
-              
-                <div id="tag2-list" class="archive box" data-tag="tag2">
-                  <h4 class="archive-title">
-                    <a class="link-unstyled" href="tag2">
-                      tag2 (1)
-                    </a>
-                  </h4>
-                  <ul class="archive-posts">
-                    
-                      <li class="archive-post">
-                        <a class="archive-post-title" href="https://example.org/post/first-post/">
-                          First Post
-                        </a>
-                        <span class="archive-post-date"> - 
-  March 21, 2023
-</span>
-                      </li>
-                    
-                  </ul>
-                </div>
-              
-                <div id="%E5%B9%B6%E5%8F%91-list" class="archive box" data-tag="并发">
-                  <h4 class="archive-title">
-                    <a class="link-unstyled" href="%E5%B9%B6%E5%8F%91">
-                      并发 (1)
-                    </a>
-                  </h4>
-                  <ul class="archive-posts">
-                    
-                      <li class="archive-post">
-                        <a class="archive-post-title" href="https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
-                          Golang多线程的踩坑点
-                        </a>
-                        <span class="archive-post-date"> - 
-  March 21, 2023
-</span>
-                      </li>
-                    
-                  </ul>
-                </div>
-              
-           </section>
-         </div>
+
+      </time>
+    
+    
+  
+  
+    <span>in</span>
+    
+      <a class="category-link" href="https://example.org/categories/category">category</a>, 
+    
+      <a class="category-link" href="https://example.org/categories/subcategory">subcategory</a>
+    
+  
+
+  </div>
+
+    </div>
+    <div class="postShorten-excerpt">
+      
+        
+      
+      <p>
+        
+          <a href="https://example.org/post/first-post/" class="postShorten-excerpt_link link" aria-label="Open the post: First Post">Continue reading</a>
+        
+        
+      </p>
+    </div>
+  </div>
+  
+</article>
+
+            
+            
+
+          </section>
+        
         <footer id="footer" class="main-content-wrap">
   <span class="copyrights">
     &copy; 2023 ZHOUSH41. All Rights Reserved
@@ -333,6 +292,7 @@
 
       </div>
     </div>
+    
     <div id="about">
   <div id="about-card">
     <div id="about-btn-close">
@@ -363,6 +323,8 @@
 </div>
 
     
+
+    
   
     
       <div id="cover" style="background-image:url('https://example.org/images/cover.jpg');"></div>
@@ -370,8 +332,7 @@
   
 
 
-  </body>
-  
+    
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/highlight.min.js" integrity="sha512-z+/WWfyD5tccCukM4VvONpEtLmbAm5LDu7eKiyMQJ9m7OfPEDL7gENyDRL3Yfe8XAuGsS2fS4xSMnl6d30kqGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -438,4 +399,7 @@ $(document).ready(function() {
 
 
 
+    
+  </body>
 </html>
+

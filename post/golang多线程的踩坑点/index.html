@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+    <script type="application/ld+json">
+
+{  
+  "@context":"http://schema.org",
+  "@type":"Website",
+  "@id":"https:\/\/example.org\/",
+  "author": {
+    "@type": "Person",
+    "name": "ZHOUSH41",
+    
+    "image": "https://www.gravatar.com/avatar/ef0b72b98f479f5123a54b6c06c9ef12"
+    
+  },
+  "name":"Hugo tranquilpeak theme",
+  "description":"\u003ch2 id=\u0022问题\u0022\u003e问题：\u003c\/h2\u003e\n\u003cp\u003e从一个多线程处理并发问题谈起，首先有一个任务处理函数 DoTask(int) int，此函数根据输入计算一个结果并返回（任意的实现）。编写程序，用户可以输入n个需要处理的数据和最大的并行计算数 m。这n个输入数据通过DoTask函数并行的完成计算，每完成一次计算，就输出进度、已完成的计算结果的累加值。\u003c\/p\u003e\n\u003cdiv class=\u0022highlight\u0022\u003e\u003cpre tabindex=\u00220\u0022 style=\u0022color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\u0022\u003e\u003ccode class=\u0022language-go\u0022 data-lang=\u0022go\u0022\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ 任意的返回一个结果就行，这块随意实现\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003eDoTask\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e) \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ereturn\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e*\u003c\/span\u003e\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e}\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/code\u003e\u003c\/pre\u003e\u003c\/div\u003e\u003ch2 id=\u0022问题分析\u0022\u003e问题分析：\u003c\/h2\u003e\n\u003col\u003e\n\u003cli\u003e并发模式：首先这是一个多生产者单消费者的并发模式，那么可以生产者可以通过channel来发送数据\u003c\/li\u003e\n\u003cli\u003e并发控制：问题中可以用条件变量或者channel来实现，最大并发数的控制\u003c\/li\u003e\n\u003cli\u003e并发协调：因为需要等待所有生产者生产完数据之后才能退出，所以这里需要waitgroup来控制并发完之后的协程等待\u003c\/li\u003e\n\u003c\/ol\u003e\n\u003cul\u003e\n\u003cli\u003e初版\u003c\/li\u003e\n\u003c\/ul\u003e\n\u003cdiv class=\u0022highlight\u0022\u003e\u003cpre tabindex=\u00220\u0022 style=\u0022color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\u0022\u003e\u003ccode class=\u0022language-go\u0022 data-lang=\u0022go\u0022\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003emain\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003em\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e10\u003c\/span\u003e, \u003cspan style=\u0022color:#ae81ff\u0022\u003e5\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003evar\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003esync\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWaitGroup\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003emaxCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003em\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;=\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003em\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003emaxCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;=\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eAdd\u003c\/span\u003e(\u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e) {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;start go\u0026#34;\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e\u003cspan style=\u0022color:#a6e22e\u0022\u003emaxCh\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003eDoTask\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003emaxCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}(\u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eDone\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003esum\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ fEnd:\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003eselect\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ecase\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ex\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e:\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u002b=\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ex\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003esum\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003esum\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003eif\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003esum\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e==\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ break fEnd\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\t\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ereturn\u003c\/span\u003e \n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003edefault\u003c\/span\u003e:\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSleep\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSecond\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWait\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e}\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/code\u003e\u003c\/pre\u003e\u003c\/div\u003e\u003cp\u003etips: for select中如果需要使用break，需要指定外层的for命名，不然只会跳过seclect\n初版实现的问题：\u003c\/p\u003e\n\u003col\u003e\n\u003cli\u003e虽然打印出来了对应的数据，但是没有控制并发的数量，因为实际上是进入了go func后在go func里做执行的时候阻塞住了，并没有控制到对应数量的\u003c\/li\u003e\n\u003cli\u003e没有实现优雅退出，因为是通过消费端特定数量的实现来确定的退出机制的，这样实现不太优雅\u003c\/li\u003e\n\u003cli\u003ewaitgroup实际上没有任何的用处，因为消费端是在主进程之中，并且是循环等待的，所以怎么都会等待所有生产者线程执行完\u003c\/li\u003e\n\u003c\/ol\u003e\n\u003cp\u003e第二版实现：\u003c\/p\u003e\n\u003cdiv class=\u0022highlight\u0022\u003e\u003cpre tabindex=\u00220\u0022 style=\u0022color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\u0022\u003e\u003ccode class=\u0022language-go\u0022 data-lang=\u0022go\u0022\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003emain\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003estruct\u003c\/span\u003e{}, \u003cspan style=\u0022color:#ae81ff\u0022\u003e3\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e, \u003cspan style=\u0022color:#ae81ff\u0022\u003e3\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003evar\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003esync\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWaitGroup\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003erange\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u002b=\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;receiver\u0026#34;\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;all done\u0026#34;\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ sender controller\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e10\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003estruct\u003c\/span\u003e{}{}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eAdd\u003c\/span\u003e(\u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ worker\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e) {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;start go\u0026#34;\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003edefer\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eDone\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ do something\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003eDoTask\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSleep\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSecond\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}(\u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWait\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e}\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/code\u003e\u003c\/pre\u003e\u003c\/div\u003e\u003cp\u003e改动\u003c\/p\u003e\n\u003col\u003e\n\u003cli\u003e把并发控制的channel前置到for循环当中，实际上就只有3个协程在工作了\u003c\/li\u003e\n\u003cli\u003ewaitgroup可以做有效的等待了（但这里还是有问题）\n问题\u003c\/li\u003e\n\u003cli\u003e消费者线程打印的all done其实不会打印，因为主进程已经退出了\u003c\/li\u003e\n\u003cli\u003e其实也没有实现优雅退出，因为并没有去关闭对应的channel\u003c\/li\u003e\n\u003c\/ol\u003e\n\u003cp\u003e最终版：\u003c\/p\u003e\n\u003cdiv class=\u0022highlight\u0022\u003e\u003cpre tabindex=\u00220\u0022 style=\u0022color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\u0022\u003e\u003ccode class=\u0022language-go\u0022 data-lang=\u0022go\u0022\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003emain\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003estruct\u003c\/span\u003e{}, \u003cspan style=\u0022color:#ae81ff\u0022\u003e3\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e make(\u003cspan style=\u0022color:#66d9ef\u0022\u003echan\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e, \u003cspan style=\u0022color:#ae81ff\u0022\u003e3\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003evar\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003esync\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWaitGroup\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003evar\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg1\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003esync\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWaitGroup\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eAdd\u003c\/span\u003e(\u003cspan style=\u0022color:#ae81ff\u0022\u003e2\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ sender controller\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003edefer\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eDone\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e100000\u003c\/span\u003e; \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003estruct\u003c\/span\u003e{}{}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg1\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eAdd\u003c\/span\u003e(\u003cspan style=\u0022color:#ae81ff\u0022\u003e1\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ worker\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003eint\u003c\/span\u003e) {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003edefer\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg1\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eDone\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ do something\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003eDoTask\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003en\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSleep\u003c\/span\u003e(\u003cspan style=\u0022color:#a6e22e\u0022\u003etime\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eSecond\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\t\u003cspan style=\u0022color:#f92672\u0022\u003e\u0026lt;-\u003c\/span\u003e\u003cspan style=\u0022color:#a6e22e\u0022\u003ech\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t}(\u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg1\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWait\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\tclose(\u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#75715e\u0022\u003e\/\/ recevied controller\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\u003cspan style=\u0022color:#75715e\u0022\u003e\u003c\/span\u003e\t\u003cspan style=\u0022color:#66d9ef\u0022\u003ego\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003efunc\u003c\/span\u003e() {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003edefer\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eDone\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#ae81ff\u0022\u003e0\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#66d9ef\u0022\u003efor\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e:=\u003c\/span\u003e \u003cspan style=\u0022color:#66d9ef\u0022\u003erange\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003enCh\u003c\/span\u003e {\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e\u003cspan style=\u0022color:#f92672\u0022\u003e\u002b\u002b\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e \u003cspan style=\u0022color:#f92672\u0022\u003e\u002b=\u003c\/span\u003e \u003cspan style=\u0022color:#a6e22e\u0022\u003ei\u003c\/span\u003e\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;receiver\u0026#34;\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003eidx\u003c\/span\u003e, \u003cspan style=\u0022color:#a6e22e\u0022\u003etotoal\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t}\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\t\u003cspan style=\u0022color:#a6e22e\u0022\u003efmt\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003ePrintln\u003c\/span\u003e(\u003cspan style=\u0022color:#e6db74\u0022\u003e\u0026#34;all done\u0026#34;\u003c\/span\u003e)\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t}()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e\t\u003cspan style=\u0022color:#a6e22e\u0022\u003ewg\u003c\/span\u003e.\u003cspan style=\u0022color:#a6e22e\u0022\u003eWait\u003c\/span\u003e()\n\u003c\/span\u003e\u003c\/span\u003e\u003cspan style=\u0022display:flex;\u0022\u003e\u003cspan\u003e}\n\u003c\/span\u003e\u003c\/span\u003e\u003c\/code\u003e\u003c\/pre\u003e\u003c\/div\u003e\u003col\u003e\n\u003cli\u003e主进程需要等待生产者和消费都结束之后才能退出，这个wg保证的\u003c\/li\u003e\n\u003cli\u003e生产者在所有生产队列生产完毕之后close 发送的channel，实现了优雅的关闭逻辑\u003c\/li\u003e\n\u003c\/ol\u003e\n\u003cp\u003e当然也可以使用，消费者去close一个channel，然后将这个消息proxy给生产者然后退出，\n上面最终版的实现把多生产者再统一成一个管理者的模式，可以实现优雅的关闭，还可以拓展成多生产多消费的情况，而且代码易读性（易读性是个人的看法）比较好\u003c\/p\u003e",
+  "url":"https:\/\/example.org\/post\/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9\/",
+  "keywords":"[tech]"
+}
+
+</script>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Hugo 0.105.0 with theme Tranquilpeak 0.5.3-BETA">
+<meta name="author" content="ZHOUSH41">
+<meta name="keywords" content="tech">
+<meta name="description" content="问题：
+从一个多线程处理并发问题谈起，首先有一个任务处理函数 DoTask(int) int，此函数根据输入计算一个结果并返回（任意的实现）。编写程序，用户可以输入n个需要处理的数据和最大的并行计算数 m。这n个输入数据通过DoTask函数并行的完成计算，每完成一次计算，就输出进度、已完成的计算结果的累加值。
+// 任意的返回一个结果就行，这块随意实现
+func DoTask(n int) int {
+	return n*n
+}
+问题分析：
+
+并发模式：首先这是一个多生产者单消费者的并发模式，那么可以生产者可以通过channel来发送数据
+并发控制：问题中可以用条件变量或者channel来实现，最大并发数的控制
+并发协调：因为需要等待所有生产者生产完数据之后才能退出，所以这里需要waitgroup来控制并发完之后的协程等待
+
+
+初版
+
+func main() {
+	n, m := 10, 5
+	var wg sync.WaitGroup
+	maxCh := make(chan int, m)
+	for i := 1; i &lt;= m; i&#43;&#43; {
+		maxCh &lt;- i
+	}
+	ch := make(chan int)
+	for i := 1; i &lt;= n; i&#43;&#43; {
+		wg.Add(1)
+		go func(n int) {
+			fmt.Println(&#34;start go&#34;, n)
+			&lt;-maxCh
+			ch &lt;- DoTask(n)
+			maxCh &lt;- 1
+		}(i)
+		wg.Done()
+	}
+	totoal := 0
+	sum := 0
+// fEnd:
+	for {
+		select {
+		case x := &lt;-ch:
+			totoal &#43;= x
+			sum&#43;&#43;
+			fmt.Println(sum, totoal)
+			if sum == n {
+				// break fEnd
+				return 
+			}
+		default:
+			time.Sleep(time.Second)
+		}
+	}
+	wg.Wait()
+}
+tips: for select中如果需要使用break，需要指定外层的for命名，不然只会跳过seclect
+初版实现的问题：
+
+虽然打印出来了对应的数据，但是没有控制并发的数量，因为实际上是进入了go func后在go func里做执行的时候阻塞住了，并没有控制到对应数量的
+没有实现优雅退出，因为是通过消费端特定数量的实现来确定的退出机制的，这样实现不太优雅
+waitgroup实际上没有任何的用处，因为消费端是在主进程之中，并且是循环等待的，所以怎么都会等待所有生产者线程执行完
+
+第二版实现：
+func main() {
+	ch := make(chan struct{}, 3)
+	nCh := make(chan int, 3)
+	var wg sync.WaitGroup
+	go func() {
+		idx := 0
+		totoal := 0
+		for i := range nCh {
+			idx&#43;&#43;
+			totoal &#43;= i
+			fmt.Println(&#34;receiver&#34;, idx, totoal)
+		}
+		fmt.Println(&#34;all done&#34;)
+	}()
+	// sender controller
+	for i := 1; i &lt;= 10; i&#43;&#43; {
+		ch &lt;- struct{}{}
+		wg.Add(1)
+		// worker
+		go func(n int) {
+			fmt.Println(&#34;start go&#34;, n)
+			defer wg.Done()
+			// do something
+			nCh &lt;- DoTask(n)
+			time.Sleep(time.Second)
+			&lt;-ch
+		}(i)
+	}
+	wg.Wait()
+}
+改动
+
+把并发控制的channel前置到for循环当中，实际上就只有3个协程在工作了
+waitgroup可以做有效的等待了（但这里还是有问题）
+问题
+消费者线程打印的all done其实不会打印，因为主进程已经退出了
+其实也没有实现优雅退出，因为并没有去关闭对应的channel
+
+最终版：
+func main() {
+	ch := make(chan struct{}, 3)
+	nCh := make(chan int, 3)
+	var wg sync.WaitGroup
+	var wg1 sync.WaitGroup
+	wg.Add(2)
+	// sender controller
+	go func() {
+		defer wg.Done()
+		for i := 1; i &lt;= 100000; i&#43;&#43; {
+			ch &lt;- struct{}{}
+			wg1.Add(1)
+			// worker
+			go func(n int) {
+				defer wg1.Done()
+				// do something
+				nCh &lt;- DoTask(n)
+				time.Sleep(time.Second)
+				&lt;-ch
+			}(i)
+		}
+		wg1.Wait()
+		close(nCh)
+	}()
+
+	// recevied controller
+	go func() {
+		defer wg.Done()
+		idx := 0
+		totoal := 0
+		for i := range nCh {
+			idx&#43;&#43;
+			totoal &#43;= i
+			fmt.Println(&#34;receiver&#34;, idx, totoal)
+		}
+		fmt.Println(&#34;all done&#34;)
+	}()
+	wg.Wait()
+}
+
+主进程需要等待生产者和消费都结束之后才能退出，这个wg保证的
+生产者在所有生产队列生产完毕之后close 发送的channel，实现了优雅的关闭逻辑
+
+当然也可以使用，消费者去close一个channel，然后将这个消息proxy给生产者然后退出，
+上面最终版的实现把多生产者再统一成一个管理者的模式，可以实现优雅的关闭，还可以拓展成多生产多消费的情况，而且代码易读性（易读性是个人的看法）比较好">
+
+
+<meta property="og:description" content="问题：
+从一个多线程处理并发问题谈起，首先有一个任务处理函数 DoTask(int) int，此函数根据输入计算一个结果并返回（任意的实现）。编写程序，用户可以输入n个需要处理的数据和最大的并行计算数 m。这n个输入数据通过DoTask函数并行的完成计算，每完成一次计算，就输出进度、已完成的计算结果的累加值。
+// 任意的返回一个结果就行，这块随意实现
+func DoTask(n int) int {
+	return n*n
+}
+问题分析：
+
+并发模式：首先这是一个多生产者单消费者的并发模式，那么可以生产者可以通过channel来发送数据
+并发控制：问题中可以用条件变量或者channel来实现，最大并发数的控制
+并发协调：因为需要等待所有生产者生产完数据之后才能退出，所以这里需要waitgroup来控制并发完之后的协程等待
+
+
+初版
+
+func main() {
+	n, m := 10, 5
+	var wg sync.WaitGroup
+	maxCh := make(chan int, m)
+	for i := 1; i &lt;= m; i&#43;&#43; {
+		maxCh &lt;- i
+	}
+	ch := make(chan int)
+	for i := 1; i &lt;= n; i&#43;&#43; {
+		wg.Add(1)
+		go func(n int) {
+			fmt.Println(&#34;start go&#34;, n)
+			&lt;-maxCh
+			ch &lt;- DoTask(n)
+			maxCh &lt;- 1
+		}(i)
+		wg.Done()
+	}
+	totoal := 0
+	sum := 0
+// fEnd:
+	for {
+		select {
+		case x := &lt;-ch:
+			totoal &#43;= x
+			sum&#43;&#43;
+			fmt.Println(sum, totoal)
+			if sum == n {
+				// break fEnd
+				return 
+			}
+		default:
+			time.Sleep(time.Second)
+		}
+	}
+	wg.Wait()
+}
+tips: for select中如果需要使用break，需要指定外层的for命名，不然只会跳过seclect
+初版实现的问题：
+
+虽然打印出来了对应的数据，但是没有控制并发的数量，因为实际上是进入了go func后在go func里做执行的时候阻塞住了，并没有控制到对应数量的
+没有实现优雅退出，因为是通过消费端特定数量的实现来确定的退出机制的，这样实现不太优雅
+waitgroup实际上没有任何的用处，因为消费端是在主进程之中，并且是循环等待的，所以怎么都会等待所有生产者线程执行完
+
+第二版实现：
+func main() {
+	ch := make(chan struct{}, 3)
+	nCh := make(chan int, 3)
+	var wg sync.WaitGroup
+	go func() {
+		idx := 0
+		totoal := 0
+		for i := range nCh {
+			idx&#43;&#43;
+			totoal &#43;= i
+			fmt.Println(&#34;receiver&#34;, idx, totoal)
+		}
+		fmt.Println(&#34;all done&#34;)
+	}()
+	// sender controller
+	for i := 1; i &lt;= 10; i&#43;&#43; {
+		ch &lt;- struct{}{}
+		wg.Add(1)
+		// worker
+		go func(n int) {
+			fmt.Println(&#34;start go&#34;, n)
+			defer wg.Done()
+			// do something
+			nCh &lt;- DoTask(n)
+			time.Sleep(time.Second)
+			&lt;-ch
+		}(i)
+	}
+	wg.Wait()
+}
+改动
+
+把并发控制的channel前置到for循环当中，实际上就只有3个协程在工作了
+waitgroup可以做有效的等待了（但这里还是有问题）
+问题
+消费者线程打印的all done其实不会打印，因为主进程已经退出了
+其实也没有实现优雅退出，因为并没有去关闭对应的channel
+
+最终版：
+func main() {
+	ch := make(chan struct{}, 3)
+	nCh := make(chan int, 3)
+	var wg sync.WaitGroup
+	var wg1 sync.WaitGroup
+	wg.Add(2)
+	// sender controller
+	go func() {
+		defer wg.Done()
+		for i := 1; i &lt;= 100000; i&#43;&#43; {
+			ch &lt;- struct{}{}
+			wg1.Add(1)
+			// worker
+			go func(n int) {
+				defer wg1.Done()
+				// do something
+				nCh &lt;- DoTask(n)
+				time.Sleep(time.Second)
+				&lt;-ch
+			}(i)
+		}
+		wg1.Wait()
+		close(nCh)
+	}()
+
+	// recevied controller
+	go func() {
+		defer wg.Done()
+		idx := 0
+		totoal := 0
+		for i := range nCh {
+			idx&#43;&#43;
+			totoal &#43;= i
+			fmt.Println(&#34;receiver&#34;, idx, totoal)
+		}
+		fmt.Println(&#34;all done&#34;)
+	}()
+	wg.Wait()
+}
+
+主进程需要等待生产者和消费都结束之后才能退出，这个wg保证的
+生产者在所有生产队列生产完毕之后close 发送的channel，实现了优雅的关闭逻辑
+
+当然也可以使用，消费者去close一个channel，然后将这个消息proxy给生产者然后退出，
+上面最终版的实现把多生产者再统一成一个管理者的模式，可以实现优雅的关闭，还可以拓展成多生产多消费的情况，而且代码易读性（易读性是个人的看法）比较好">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang多线程的踩坑点">
+<meta name="twitter:title" content="Golang多线程的踩坑点">
+<meta property="og:url" content="https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
+<meta property="twitter:url" content="https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
+<meta property="og:site_name" content="Hugo tranquilpeak theme">
+<meta property="og:description" content="问题：
+从一个多线程处理并发问题谈起，首先有一个任务处理函数 DoTask(int) int，此函数根据输入计算一个结果并返回（任意的实现）。编写程序，用户可以输入n个需要处理的数据和最大的并行计算数 m。这n个输入数据通过DoTask函数并行的完成计算，每完成一次计算，就输出进度、已完成的计算结果的累加值。
+// 任意的返回一个结果就行，这块随意实现
+func DoTask(n int) int {
+	return n*n
+}
+问题分析：
+
+并发模式：首先这是一个多生产者单消费者的并发模式，那么可以生产者可以通过channel来发送数据
+并发控制：问题中可以用条件变量或者channel来实现，最大并发数的控制
+并发协调：因为需要等待所有生产者生产完数据之后才能退出，所以这里需要waitgroup来控制并发完之后的协程等待
+
+
+初版
+
+func main() {
+	n, m := 10, 5
+	var wg sync.WaitGroup
+	maxCh := make(chan int, m)
+	for i := 1; i &lt;= m; i&#43;&#43; {
+		maxCh &lt;- i
+	}
+	ch := make(chan int)
+	for i := 1; i &lt;= n; i&#43;&#43; {
+		wg.Add(1)
+		go func(n int) {
+			fmt.Println(&#34;start go&#34;, n)
+			&lt;-maxCh
+			ch &lt;- DoTask(n)
+			maxCh &lt;- 1
+		}(i)
+		wg.Done()
+	}
+	totoal := 0
+	sum := 0
+// fEnd:
+	for {
+		select {
+		case x := &lt;-ch:
+			totoal &#43;= x
+			sum&#43;&#43;
+			fmt.Println(sum, totoal)
+			if sum == n {
+				// break fEnd
+				return 
+			}
+		default:
+			time.Sleep(time.Second)
+		}
+	}
+	wg.Wait()
+}
+tips: for select中如果需要使用break，需要指定外层的for命名，不然只会跳过seclect
+初版实现的问题：
+
+虽然打印出来了对应的数据，但是没有控制并发的数量，因为实际上是进入了go func后在go func里做执行的时候阻塞住了，并没有控制到对应数量的
+没有实现优雅退出，因为是通过消费端特定数量的实现来确定的退出机制的，这样实现不太优雅
+waitgroup实际上没有任何的用处，因为消费端是在主进程之中，并且是循环等待的，所以怎么都会等待所有生产者线程执行完
+
+第二版实现：
+func main() {
+	ch := make(chan struct{}, 3)
+	nCh := make(chan int, 3)
+	var wg sync.WaitGroup
+	go func() {
+		idx := 0
+		totoal := 0
+		for i := range nCh {
+			idx&#43;&#43;
+			totoal &#43;= i
+			fmt.Println(&#34;receiver&#34;, idx, totoal)
+		}
+		fmt.Println(&#34;all done&#34;)
+	}()
+	// sender controller
+	for i := 1; i &lt;= 10; i&#43;&#43; {
+		ch &lt;- struct{}{}
+		wg.Add(1)
+		// worker
+		go func(n int) {
+			fmt.Println(&#34;start go&#34;, n)
+			defer wg.Done()
+			// do something
+			nCh &lt;- DoTask(n)
+			time.Sleep(time.Second)
+			&lt;-ch
+		}(i)
+	}
+	wg.Wait()
+}
+改动
+
+把并发控制的channel前置到for循环当中，实际上就只有3个协程在工作了
+waitgroup可以做有效的等待了（但这里还是有问题）
+问题
+消费者线程打印的all done其实不会打印，因为主进程已经退出了
+其实也没有实现优雅退出，因为并没有去关闭对应的channel
+
+最终版：
+func main() {
+	ch := make(chan struct{}, 3)
+	nCh := make(chan int, 3)
+	var wg sync.WaitGroup
+	var wg1 sync.WaitGroup
+	wg.Add(2)
+	// sender controller
+	go func() {
+		defer wg.Done()
+		for i := 1; i &lt;= 100000; i&#43;&#43; {
+			ch &lt;- struct{}{}
+			wg1.Add(1)
+			// worker
+			go func(n int) {
+				defer wg1.Done()
+				// do something
+				nCh &lt;- DoTask(n)
+				time.Sleep(time.Second)
+				&lt;-ch
+			}(i)
+		}
+		wg1.Wait()
+		close(nCh)
+	}()
+
+	// recevied controller
+	go func() {
+		defer wg.Done()
+		idx := 0
+		totoal := 0
+		for i := range nCh {
+			idx&#43;&#43;
+			totoal &#43;= i
+			fmt.Println(&#34;receiver&#34;, idx, totoal)
+		}
+		fmt.Println(&#34;all done&#34;)
+	}()
+	wg.Wait()
+}
+
+主进程需要等待生产者和消费都结束之后才能退出，这个wg保证的
+生产者在所有生产队列生产完毕之后close 发送的channel，实现了优雅的关闭逻辑
+
+当然也可以使用，消费者去close一个channel，然后将这个消息proxy给生产者然后退出，
+上面最终版的实现把多生产者再统一成一个管理者的模式，可以实现优雅的关闭，还可以拓展成多生产多消费的情况，而且代码易读性（易读性是个人的看法）比较好">
+<meta name="twitter:description" content="问题：
+从一个多线程处理并发问题谈起，首先有一个任务处理函数 DoTask(int) int，此函数根据输入计算一个结果并返回（任意的实现）。编写程序，用户可以输入n个需要处理的数据和最大的并行计算数 m。这n个输入数据通过DoTask函数并行的完成计算，每完成一次计算，就输出进度、已完成的计算结果的累加值。
+// 任意的返回一个结果就行，这块随意实现
+func DoTask(n int) int {
+	return n*n
+}
+问题分析：
+
+并发模式：首先这是一个多生产者单消费者的并发模式，那么可以生产者可以通过channel来发送数据
+并发控制：问题中可以用条件变量或者channel来实现，最大并发数的控制
+并发协调：因为需要等待所有生产者生产完数据之后才能退出，所以这里需要waitgroup来控制并发完之后的协程等待
+
+
+初版
+
+func main() {
+	n, m := 10, 5
+	var wg sync.WaitGroup
+	maxCh := make(chan int, m)
+	for i := 1; i &lt;= m; i&#43;&#43; {
+		maxCh &lt;- i
+	}
+	ch := make(chan int)
+	for i := 1; i &lt;= n; i&#43;&#43; {
+		wg.Add(1)
+		go func(n int) {
+			fmt.Println(&#34;start go&#34;, n)
+			&lt;-maxCh
+			ch &lt;- DoTask(n)
+			maxCh &lt;- 1
+		}(i)
+		wg.Done()
+	}
+	totoal := 0
+	sum := 0
+// fEnd:
+	for {
+		select {
+		case x := &lt;-ch:
+			totoal &#43;= x
+			sum&#43;&#43;
+			fmt.Println(sum, totoal)
+			if sum == n {
+				// break fEnd
+				return 
+			}
+		default:
+			time.Sleep(time.Second)
+		}
+	}
+	wg.Wait()
+}
+tips: for select中如果需要使用break，需要指定外层的for命名，不然只会跳过seclect
+初版实现的问题：
+
+虽然打印出来了对应的数据，但是没有控制并发的数量，因为实际上是进入了go func后在go func里做执行的时候阻塞住了，并没有控制到对应数量的
+没有实现优雅退出，因为是通过消费端特定数量的实现来确定的退出机制的，这样实现不太优雅
+waitgroup实际上没有任何的用处，因为消费端是在主进程之中，并且是循环等待的，所以怎么都会等待所有生产者线程执行完
+
+第二版实现：
+func main() {
+	ch := make(chan struct{}, 3)
+	nCh := make(chan int, 3)
+	var wg sync.WaitGroup
+	go func() {
+		idx := 0
+		totoal := 0
+		for i := range nCh {
+			idx&#43;&#43;
+			totoal &#43;= i
+			fmt.Println(&#34;receiver&#34;, idx, totoal)
+		}
+		fmt.Println(&#34;all done&#34;)
+	}()
+	// sender controller
+	for i := 1; i &lt;= 10; i&#43;&#43; {
+		ch &lt;- struct{}{}
+		wg.Add(1)
+		// worker
+		go func(n int) {
+			fmt.Println(&#34;start go&#34;, n)
+			defer wg.Done()
+			// do something
+			nCh &lt;- DoTask(n)
+			time.Sleep(time.Second)
+			&lt;-ch
+		}(i)
+	}
+	wg.Wait()
+}
+改动
+
+把并发控制的channel前置到for循环当中，实际上就只有3个协程在工作了
+waitgroup可以做有效的等待了（但这里还是有问题）
+问题
+消费者线程打印的all done其实不会打印，因为主进程已经退出了
+其实也没有实现优雅退出，因为并没有去关闭对应的channel
+
+最终版：
+func main() {
+	ch := make(chan struct{}, 3)
+	nCh := make(chan int, 3)
+	var wg sync.WaitGroup
+	var wg1 sync.WaitGroup
+	wg.Add(2)
+	// sender controller
+	go func() {
+		defer wg.Done()
+		for i := 1; i &lt;= 100000; i&#43;&#43; {
+			ch &lt;- struct{}{}
+			wg1.Add(1)
+			// worker
+			go func(n int) {
+				defer wg1.Done()
+				// do something
+				nCh &lt;- DoTask(n)
+				time.Sleep(time.Second)
+				&lt;-ch
+			}(i)
+		}
+		wg1.Wait()
+		close(nCh)
+	}()
+
+	// recevied controller
+	go func() {
+		defer wg.Done()
+		idx := 0
+		totoal := 0
+		for i := range nCh {
+			idx&#43;&#43;
+			totoal &#43;= i
+			fmt.Println(&#34;receiver&#34;, idx, totoal)
+		}
+		fmt.Println(&#34;all done&#34;)
+	}()
+	wg.Wait()
+}
+
+主进程需要等待生产者和消费都结束之后才能退出，这个wg保证的
+生产者在所有生产队列生产完毕之后close 发送的channel，实现了优雅的关闭逻辑
+
+当然也可以使用，消费者去close一个channel，然后将这个消息proxy给生产者然后退出，
+上面最终版的实现把多生产者再统一成一个管理者的模式，可以实现优雅的关闭，还可以拓展成多生产多消费的情况，而且代码易读性（易读性是个人的看法）比较好">
+<meta property="og:locale" content="en-us">
+
+  
+    <meta property="article:published_time" content="2023-03-21T07:14:20">
+  
+  
+    <meta property="article:modified_time" content="2023-03-21T07:14:20">
+  
+  
+  
+    
+      <meta property="article:section" content="category">
+    
+      <meta property="article:section" content="subcategory">
+    
+  
+  
+    
+      <meta property="article:tag" content="Golang">
+    
+      <meta property="article:tag" content="并发">
+    
+  
+
+
+<meta name="twitter:card" content="summary">
+
+
+
+
+
+
+
+  <meta property="og:image" content="https://www.gravatar.com/avatar/ef0b72b98f479f5123a54b6c06c9ef12?s=640">
+  <meta property="twitter:image" content="https://www.gravatar.com/avatar/ef0b72b98f479f5123a54b6c06c9ef12?s=640">
+
+
+
+
+
+
+    <title>Golang多线程的踩坑点</title>
+
+    <link rel="icon" href="https://example.org/favicon.png">
+    
+
+    
+
+    <link rel="canonical" href="https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/">
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha512-H9jrZiiopUdsLpg94A333EfumgUBpO9MdbxStdeITo+KEIMaNfHNvwyjjDJb+ERPaRS6DpyRlKbvPUasNItRyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    
+    
+    <link rel="stylesheet" href="https://example.org/css/style-h6ccsoet3mzkbb0wngshlfbaweimexgqcxj0h5hu4h82olsdzz6wmqdkajm.min.css" />
+    
+    
+
+    
+      
+    
+    
+  </head>
+
+  <body>
+    <div id="blog">
+      <header id="header" data-behavior="4">
+  <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+  <div class="header-title">
+    <a class="header-title-link" href="https://example.org/" aria-label="Go to homepage">Hugo tranquilpeak theme</a>
+  </div>
+  
+    
+      <a class="header-right-picture "
+         href="https://example.org/#about" aria-label="Open the link: /#about">
+    
+    
+    
+      
+        <img class="header-picture" src="https://www.gravatar.com/avatar/ef0b72b98f479f5123a54b6c06c9ef12?s=90" alt="Author&#39;s picture" />
+      
+    
+    </a>
+  
+</header>
+
+      <nav id="sidebar" data-behavior="4">
+  <div class="sidebar-container">
+    
+      <div class="sidebar-profile">
+        <a href="https://example.org/#about" aria-label="Read more about the author">
+          <img class="sidebar-profile-picture" src="https://www.gravatar.com/avatar/ef0b72b98f479f5123a54b6c06c9ef12?s=110" alt="Author&#39;s picture" />
+        </a>
+        <h4 class="sidebar-profile-name">ZHOUSH41</h4>
+        
+          <h5 class="sidebar-profile-bio">Golang, Rust, 分布式系统爱好者</h5>
+        
+      </div>
+    
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://example.org/" title="Home">
+    
+      <i class="sidebar-button-icon fas fa-lg fa-home" aria-hidden="true"></i>
+      
+      <span class="sidebar-button-desc">Home</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://example.org/categories" title="Categories">
+    
+      <i class="sidebar-button-icon fas fa-lg fa-bookmark" aria-hidden="true"></i>
+      
+      <span class="sidebar-button-desc">Categories</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://example.org/tags" title="Tags">
+    
+      <i class="sidebar-button-icon fas fa-lg fa-tags" aria-hidden="true"></i>
+      
+      <span class="sidebar-button-desc">Tags</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://example.org/archives" title="Archives">
+    
+      <i class="sidebar-button-icon fas fa-lg fa-archive" aria-hidden="true"></i>
+      
+      <span class="sidebar-button-desc">Archives</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://example.org/#about" title="About">
+    
+      <i class="sidebar-button-icon fas fa-lg fa-question" aria-hidden="true"></i>
+      
+      <span class="sidebar-button-desc">About</span>
+    </a>
+  </li>
+
+
+    </ul>
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://github.com/ZHOUSH41" target="_blank" rel="noopener" title="GitHub">
+    
+      <i class="sidebar-button-icon fab fa-lg fa-github" aria-hidden="true"></i>
+      
+      <span class="sidebar-button-desc">GitHub</span>
+    </a>
+  </li>
+
+
+    </ul>
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://example.org/index.xml" title="RSS">
+    
+      <i class="sidebar-button-icon fas fa-lg fa-rss" aria-hidden="true"></i>
+      
+      <span class="sidebar-button-desc">RSS</span>
+    </a>
+  </li>
+
+
+    </ul>
+  </div>
+</nav>
+
+      
+
+      <div id="main" data-behavior="4"
+        class="
+               hasCoverMetaIn
+               ">
+        <article class="post" id="top">
+          
+          
+            <div class="post-header main-content-wrap text-left">
+  
+    <h1 class="post-title">
+      Golang多线程的踩坑点
+    </h1>
+  
+  
+  <div class="postShorten-meta post-meta">
+    
+      <time datetime="2023-03-21T07:14:20&#43;08:00">
+        
+  March 21, 2023
+
+      </time>
+    
+    
+  
+  
+    <span>in</span>
+    
+      <a class="category-link" href="https://example.org/categories/category">category</a>, 
+    
+      <a class="category-link" href="https://example.org/categories/subcategory">subcategory</a>
+    
+  
+
+  </div>
+
+</div>
+          
+          <div class="post-content markdown">
+            <div class="main-content-wrap">
+              <h2 id="问题">问题：</h2>
+<p>从一个多线程处理并发问题谈起，首先有一个任务处理函数 DoTask(int) int，此函数根据输入计算一个结果并返回（任意的实现）。编写程序，用户可以输入n个需要处理的数据和最大的并行计算数 m。这n个输入数据通过DoTask函数并行的完成计算，每完成一次计算，就输出进度、已完成的计算结果的累加值。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">// 任意的返回一个结果就行，这块随意实现
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">DoTask</span>(<span style="color:#a6e22e">n</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">int</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">n</span><span style="color:#f92672">*</span><span style="color:#a6e22e">n</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="问题分析">问题分析：</h2>
+<ol>
+<li>并发模式：首先这是一个多生产者单消费者的并发模式，那么可以生产者可以通过channel来发送数据</li>
+<li>并发控制：问题中可以用条件变量或者channel来实现，最大并发数的控制</li>
+<li>并发协调：因为需要等待所有生产者生产完数据之后才能退出，所以这里需要waitgroup来控制并发完之后的协程等待</li>
+</ol>
+<ul>
+<li>初版</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">n</span>, <span style="color:#a6e22e">m</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">maxCh</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">m</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">m</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">maxCh</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">i</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">n</span> <span style="color:#66d9ef">int</span>) {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;start go&#34;</span>, <span style="color:#a6e22e">n</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">maxCh</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">DoTask</span>(<span style="color:#a6e22e">n</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">maxCh</span> <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>		}(<span style="color:#a6e22e">i</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">totoal</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">sum</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// fEnd:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">for</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">select</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">case</span> <span style="color:#a6e22e">x</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>:
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">totoal</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">x</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">sum</span><span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">sum</span>, <span style="color:#a6e22e">totoal</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">sum</span> <span style="color:#f92672">==</span> <span style="color:#a6e22e">n</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#75715e">// break fEnd
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>				<span style="color:#66d9ef">return</span> 
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">default</span>:
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>tips: for select中如果需要使用break，需要指定外层的for命名，不然只会跳过seclect
+初版实现的问题：</p>
+<ol>
+<li>虽然打印出来了对应的数据，但是没有控制并发的数量，因为实际上是进入了go func后在go func里做执行的时候阻塞住了，并没有控制到对应数量的</li>
+<li>没有实现优雅退出，因为是通过消费端特定数量的实现来确定的退出机制的，这样实现不太优雅</li>
+<li>waitgroup实际上没有任何的用处，因为消费端是在主进程之中，并且是循环等待的，所以怎么都会等待所有生产者线程执行完</li>
+</ol>
+<p>第二版实现：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}, <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">nCh</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>, <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">idx</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">totoal</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">nCh</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">idx</span><span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">totoal</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">i</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;receiver&#34;</span>, <span style="color:#a6e22e">idx</span>, <span style="color:#a6e22e">totoal</span>)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;all done&#34;</span>)
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// sender controller
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">10</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#66d9ef">struct</span>{}{}
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#75715e">// worker
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">n</span> <span style="color:#66d9ef">int</span>) {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;start go&#34;</span>, <span style="color:#a6e22e">n</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#75715e">// do something
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>			<span style="color:#a6e22e">nCh</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">DoTask</span>(<span style="color:#a6e22e">n</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>
+</span></span><span style="display:flex;"><span>		}(<span style="color:#a6e22e">i</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>改动</p>
+<ol>
+<li>把并发控制的channel前置到for循环当中，实际上就只有3个协程在工作了</li>
+<li>waitgroup可以做有效的等待了（但这里还是有问题）
+问题</li>
+<li>消费者线程打印的all done其实不会打印，因为主进程已经退出了</li>
+<li>其实也没有实现优雅退出，因为并没有去关闭对应的channel</li>
+</ol>
+<p>最终版：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}, <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">nCh</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>, <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg1</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// sender controller
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">100000</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#66d9ef">struct</span>{}{}
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">wg1</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#75715e">// worker
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>			<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">n</span> <span style="color:#66d9ef">int</span>) {
+</span></span><span style="display:flex;"><span>				<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg1</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>				<span style="color:#75715e">// do something
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>				<span style="color:#a6e22e">nCh</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">DoTask</span>(<span style="color:#a6e22e">n</span>)
+</span></span><span style="display:flex;"><span>				<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>)
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>
+</span></span><span style="display:flex;"><span>			}(<span style="color:#a6e22e">i</span>)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">wg1</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>		close(<span style="color:#a6e22e">nCh</span>)
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// recevied controller
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">idx</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">totoal</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">nCh</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">idx</span><span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">totoal</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">i</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;receiver&#34;</span>, <span style="color:#a6e22e">idx</span>, <span style="color:#a6e22e">totoal</span>)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;all done&#34;</span>)
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ol>
+<li>主进程需要等待生产者和消费都结束之后才能退出，这个wg保证的</li>
+<li>生产者在所有生产队列生产完毕之后close 发送的channel，实现了优雅的关闭逻辑</li>
+</ol>
+<p>当然也可以使用，消费者去close一个channel，然后将这个消息proxy给生产者然后退出，
+上面最终版的实现把多生产者再统一成一个管理者的模式，可以实现优雅的关闭，还可以拓展成多生产多消费的情况，而且代码易读性（易读性是个人的看法）比较好</p>
+              
+
+
+            </div>
+          </div>
+          <div id="post-footer" class="post-footer main-content-wrap">
+            
+              
+                
+                
+                  <div class="post-footer-tags">
+                    <span class="text-color-light text-small">TAGGED IN</span><br/>
+                    
+  <a class="tag tag--primary tag--small" href="https://example.org/tags/golang/">Golang</a>
+
+  <a class="tag tag--primary tag--small" href="https://example.org/tags/%E5%B9%B6%E5%8F%91/">并发</a>
+
+                  </div>
+                
+              
+            
+            
+<div class="post-actions-wrap">
+  <nav >
+    <ul class="post-actions post-action-nav">
+      
+        <li class="post-action">
+          
+            <a class="post-action-btn btn btn--disabled">
+          
+              <i class="fa fa-angle-left"></i>
+              <span class="hide-xs hide-sm text-small icon-ml">NEXT</span>
+            </a>
+        </li>
+        <li class="post-action">
+          
+            <a class="post-action-btn btn btn--default tooltip--top" href="https://example.org/post/first-post/" data-tooltip="First Post" aria-label="PREVIOUS: First Post">
+          
+              <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
+              <i class="fa fa-angle-right"></i>
+            </a>
+        </li>
+      
+    </ul>
+  </nav>
+<ul class="post-actions post-action-share" >
+  
+    <li class="post-action hide-lg hide-md hide-sm">
+      <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Share this post">
+        <i class="fa fa-share-alt" aria-hidden="true"></i>
+      </a>
+    </li>
+    
+      <li class="post-action hide-xs">
+        <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Facebook" aria-label="Share on Facebook">
+          <i class="fab fa-facebook-square" aria-hidden="true"></i>
+        </a>
+      </li>
+    
+      <li class="post-action hide-xs">
+        <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Twitter" aria-label="Share on Twitter">
+          <i class="fab fa-twitter" aria-hidden="true"></i>
+        </a>
+      </li>
+    
+      <li class="post-action hide-xs">
+        <a class="post-action-btn btn btn--default" target="new" href="https://www.linkedin.com/sharing/share-offsite/?url=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Linkedin" aria-label="Share on Linkedin">
+          <i class="fab fa-linkedin" aria-hidden="true"></i>
+        </a>
+      </li>
+    
+  
+  
+    <li class="post-action">
+      <a class="post-action-btn btn btn--default" href="#disqus_thread" aria-label="Leave a comment">
+        <i class="far fa-comment"></i>
+      </a>
+    </li>
+  
+  <li class="post-action">
+    
+      <a class="post-action-btn btn btn--default" href="#top" aria-label="Back to top">
+      <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    
+    </a>
+  </li>
+</ul>
+</div>
+
+
+            
+  
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+    <script type="text/javascript">
+      var disqus_config = function() {
+        this.page.url = 'https:\/\/example.org\/post\/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9\/';
+        
+          this.page.identifier = '\/post\/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9\/'
+        
+      };
+      (function() {
+        
+        
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+          document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+          return;
+        }
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        var disqus_shortname = 'hugo-tranquilpeak-theme';
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+  
+
+
+          </div>
+        </article>
+        <footer id="footer" class="main-content-wrap">
+  <span class="copyrights">
+    &copy; 2023 ZHOUSH41. All Rights Reserved
+  </span>
+</footer>
+
+      </div>
+      <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+        
+<div class="post-actions-wrap">
+  <nav >
+    <ul class="post-actions post-action-nav">
+      
+        <li class="post-action">
+          
+            <a class="post-action-btn btn btn--disabled">
+          
+              <i class="fa fa-angle-left"></i>
+              <span class="hide-xs hide-sm text-small icon-ml">NEXT</span>
+            </a>
+        </li>
+        <li class="post-action">
+          
+            <a class="post-action-btn btn btn--default tooltip--top" href="https://example.org/post/first-post/" data-tooltip="First Post" aria-label="PREVIOUS: First Post">
+          
+              <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
+              <i class="fa fa-angle-right"></i>
+            </a>
+        </li>
+      
+    </ul>
+  </nav>
+<ul class="post-actions post-action-share" >
+  
+    <li class="post-action hide-lg hide-md hide-sm">
+      <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Share this post">
+        <i class="fa fa-share-alt" aria-hidden="true"></i>
+      </a>
+    </li>
+    
+      <li class="post-action hide-xs">
+        <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Facebook" aria-label="Share on Facebook">
+          <i class="fab fa-facebook-square" aria-hidden="true"></i>
+        </a>
+      </li>
+    
+      <li class="post-action hide-xs">
+        <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Twitter" aria-label="Share on Twitter">
+          <i class="fab fa-twitter" aria-hidden="true"></i>
+        </a>
+      </li>
+    
+      <li class="post-action hide-xs">
+        <a class="post-action-btn btn btn--default" target="new" href="https://www.linkedin.com/sharing/share-offsite/?url=https://example.org/post/golang%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E8%B8%A9%E5%9D%91%E7%82%B9/" title="Share on Linkedin" aria-label="Share on Linkedin">
+          <i class="fab fa-linkedin" aria-hidden="true"></i>
+        </a>
+      </li>
+    
+  
+  
+    <li class="post-action">
+      <a class="post-action-btn btn btn--default" href="#disqus_thread" aria-label="Leave a comment">
+        <i class="far fa-comment"></i>
+      </a>
+    </li>
+  
+  <li class="post-action">
+    
+      <a class="post-action-btn btn btn--default" href="#top" aria-label="Back to top">
+      <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    
+    </a>
+  </li>
+</ul>
+</div>
+
+
+      </div>
+      
+<div id="share-options-bar" class="share-options-bar" data-behavior="4">
+  <i id="btn-close-shareoptions" class="fa fa-times"></i>
+  <ul class="share-options">
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fexample.org%2Fpost%2Fgolang%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E7%259A%2584%25E8%25B8%25A9%25E5%259D%2591%25E7%2582%25B9%2F" aria-label="Share on Facebook">
+          <i class="fab fa-facebook-square" aria-hidden="true"></i><span>Share on Facebook</span>
+        </a>
+      </li>
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=https%3A%2F%2Fexample.org%2Fpost%2Fgolang%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E7%259A%2584%25E8%25B8%25A9%25E5%259D%2591%25E7%2582%25B9%2F" aria-label="Share on Twitter">
+          <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+        </a>
+      </li>
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fexample.org%2Fpost%2Fgolang%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E7%259A%2584%25E8%25B8%25A9%25E5%259D%2591%25E7%2582%25B9%2F" aria-label="Share on Linkedin">
+          <i class="fab fa-linkedin" aria-hidden="true"></i><span>Share on Linkedin</span>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+
+
+    </div>
+    
+    <div id="about">
+  <div id="about-card">
+    <div id="about-btn-close">
+      <i class="fa fa-times"></i>
+    </div>
+    
+      <img id="about-card-picture" src="https://www.gravatar.com/avatar/ef0b72b98f479f5123a54b6c06c9ef12?s=110" alt="Author&#39;s picture" />
+    
+    <h4 id="about-card-name">ZHOUSH41</h4>
+    
+      <div id="about-card-bio">Golang, Rust, 分布式系统爱好者</div>
+    
+    
+      <div id="about-card-job">
+        <i class="fa fa-briefcase"></i>
+        <br/>
+        Your job title
+      </div>
+    
+    
+      <div id="about-card-location">
+        <i class="fa fa-map-marker-alt"></i>
+        <br/>
+        France
+      </div>
+    
+  </div>
+</div>
+
+    
+
+    
+  
+    
+      <div id="cover" style="background-image:url('https://example.org/images/cover.jpg');"></div>
+    
+  
+
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/highlight.min.js" integrity="sha512-z+/WWfyD5tccCukM4VvONpEtLmbAm5LDu7eKiyMQJ9m7OfPEDL7gENyDRL3Yfe8XAuGsS2fS4xSMnl6d30kqGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha512-uURl+ZXMBrF4AwGaWmEetzrd+J5/8NRkWAvJx5sbPSSuOb0bZLqf+tOzniObO00BjHa/dD7gub9oCGMLPQHtQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+<script src="https://example.org/js/script-yqzy9wdlzix4lbbwdnzvwx3egsne77earqmn73v9uno8aupuph8wfguccut.min.js"></script>
+
+
+  
+    <script async crossorigin="anonymous" defer integrity="sha512-gE8KAQyFIzV1C9+GZ8TKJHZS2s+n7EjNtC+IMRn1l5+WYJTHOODUM6JSjZhFhqXmc7bG8Av6XXpckA4tYhflnw==" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/languages/apache.min.js"></script>
+  
+
+  
+    <script async crossorigin="anonymous" defer integrity="sha512-EWROca+bote+7Oaaar1F6y74iZj1r1F9rm/ly7o+/FwJopbBaWtsFDmaKoZDd3QiGU2pGacBirHJNivmGLYrow==" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/languages/go.min.js"></script>
+  
+
+  
+    <script async crossorigin="anonymous" defer integrity="sha512-GDVzAn0wpx1yVtQsRWmFc6PhJiLBPdUic+h4GWgljBh904O3JU10fk9EKNpVyIoPqkFn54rgL2QBG4BmUTMpiQ==" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/languages/http.min.js"></script>
+  
+
+  
+    <script async crossorigin="anonymous" defer integrity="sha512-UgZlma8NzkrDb/NWgmLIcTrH7i/CSnLLDRFqCSNF5NGPpjKmzyM25qcoXGOup8+cDakKyaiTDd7N4dyH4YT+IA==" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/languages/less.min.js"></script>
+  
+
+  
+    <script async crossorigin="anonymous" defer integrity="sha512-lot9koe73sfXIrUvIPM/UEhuMciN56RPyBdOyZgfO53P2lkWyyXN7J+njcxIIBRV+nVDQeiWtiXg+bLAJZDTfg==" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/languages/nginx.min.js"></script>
+  
+
+  
+    <script async crossorigin="anonymous" defer integrity="sha512-Zd3e7XxHP00TD0Imr0PIfeM0fl0v95kMWuhyAS3Wn1UTSXTkz0OhtRgBAr4JlmADRgiXr4x7lpeUdqaGN8xIog==" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/languages/puppet.min.js"></script>
+  
+
+  
+    <script async crossorigin="anonymous" defer integrity="sha512-qtqDO052iXMSP+5d/aE/jMtL9vIIGvONgTJziC2K/ZIB1yEGa55WVxGE9/08rSQ62EoDifS9SWVGZ7ihSLhzMA==" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/languages/scss.min.js"></script>
+  
+
+  
+    <script async crossorigin="anonymous" defer integrity="sha512-1NmkjnEDnwwwcu28KoQF8vs3oaPFokQHbmbtwGhFfeDsQZtVFI8zW2aE9O8yMYdpdyKV/5blE4pSWw4Z/Sv97w==" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/languages/stylus.min.js"></script>
+  
+
+  
+    <script async crossorigin="anonymous" defer integrity="sha512-B2wSfruPjr8EJL6IIzQr1eAuDwrsfIfccNf/LCEdxELCgC/S/ZMt/Uvk80aD79m7IqOqW+Sw8nbkvha20yZpzg==" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/languages/swift.min.js"></script>
+  
+
+  
+    <script async crossorigin="anonymous" defer integrity="sha512-28oDiQZGKUVN6wQ7PSLPNipOcmkCALXKwOi7bnkyFf8QiMZQxG9EQoy/iiNx6Zxj2cG2SbVa4dXKigQhu7GiFw==" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/languages/yaml.min.js"></script>
+  
+
+
+<script>
+$(document).ready(function() {
+  hljs.configure({ classPrefix: '', useBR: false });
+  $('pre.code-highlight > code, pre > code').each(function(i, block) {
+    if (!$(this).hasClass('codeblock')) {
+      $(this).addClass('codeblock');
+    }
+    hljs.highlightBlock(block);
+  });
+});
+</script>
+
+
+
+
+    
+  </body>
+</html>
+
